@@ -1,18 +1,21 @@
 ---
-title: 3.4. Common guide
+title: 3.2. Common Guide
 ---
 
 # Common guide
 
-This section intends to have articles that related to both frontend
-and backend, such as: code style hints, architecture dicisions, etc...
+This section intends to have articles that related to all submodules
+(frontend, backend and exporter) such as: code style hints,
+architecture dicisions, etc...
 
 
 ## Assertions
 
 Penpot source code has this types of assertions:
 
-**assert**: just using the clojure builtin `assert` macro.
+### **assert**
+
+Just using the clojure builtin `assert` macro.
 
 Example:
 
@@ -23,7 +26,9 @@ Example:
 This asserts are only executed on development mode. On production
 environment all assets like this will be ignored by runtime.
 
-**spec/assert**: using the `app.common.spec/assert` macro.
+### **spec/assert**
+
+Using the `app.common.spec/assert` macro.
 
 Also, if you are using clojure.spec, you have the spec based
 `clojure.spec.alpha/assert` macro. In the same way as the
@@ -32,7 +37,7 @@ removed by the compiler/runtime.
 
 Example:
 
-````clojure
+```clojure
 (require '[clojure.spec.alpha :as s]
          '[app.common.spec :as us])
 
@@ -45,7 +50,9 @@ In the same way as the `assert` macro, this performs the spec
 assertion only on development build. On production this code will
 completely removed.
 
-**spec/verify**: An assertion type that is executed always.
+### **spec/verify**
+
+An assertion type that is executed always.
 
 Example:
 
@@ -57,9 +64,9 @@ Example:
 
 This macro enables you have assetions on production code.
 
+
 **Why don't use the `clojure.spec.alpha/assert` instead of the `app.common.spec/assert`?**
 
 The Penpot variant does not peforms additional runtime checks for know
 if asserts are disabled in "runtime". As a result it generates much
 simplier code at development and production builds.
-

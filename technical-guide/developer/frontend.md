@@ -1,34 +1,33 @@
 ---
-title: 3.2. Frontend guide
+title: 3.3. Frontend Guide
 ---
 
-# Frontend guide
+# Frontend Guide
 
 This guide intends to explain the essential details of the frontend
 application.
 
 
-## Visual debug mode and utilities
+## Icons & Assets
 
-Debugging a problem in the viewport algorithms for grouping and
-rotating is difficult. We have set a visual debug mode that displays
-some annotations on screen, to help understanding what's happening.
+The icons used on the frontend application are loaded using svgsprite
+(properly handled by the gulp watch task). All icons should be on SVG
+format located in `resources/images/icons`. The gulp task will
+generate the sprite and the embedd it into the `index.html`.
 
-To activate it, open the javascript console and type
+Then, you can reference the icon from the sprite using the
+`app.builtins.icons/icon-xref` macro:
 
-```javascript
-app.util.debug.toggle_debug("option")
+```clojure
+(ns some.namespace
+  (:require-macros [app.main.ui.icons :refer [icon-xref]]))
+
+(icon-xref :arrow)
 ```
 
-Current options are `bounding-boxes`, `group`, `events` and
-`rotation-handler`.
+For performance reasons, all used icons are statically defined in the
+`src/app/main/ui/icons.cljs` file.
 
-You can also activate or deactivate all visual aids with
-
-```javascript
-app.util.debug.debug_all()
-app.util.debug.debug_none()
-```
 
 ## Logging, Tracing & Debugging
 
@@ -48,9 +47,12 @@ An alternative is using the pprint function, usefull for pretty
 printing a medium-big data sturcture for completly understand it.
 
 ```clojure
+;; on the ns part
 (:require [cljs.pprint :refer [pprint]])
+
+;; On the code
 (pprint expression)
-  ; Outputs a clojure value as a string, nicely formatted and with data type information.
+;; => Outputs a clojure value as a string, nicely formatted and with data type information.
 ```
 
 Use the js native functions for printing data.  The clj->js converts
@@ -126,7 +128,8 @@ Some keys ara treated as special cases for helping in debugging:
 ```
 
 
-## Access to clojure from javascript console
+
+### Access to clojure from js console
 
 The penpot namespace of the main application is exported, so that is
 accessible from javascript console in Chrome developer tools. Object
@@ -139,7 +142,7 @@ app.main.store.emit_BANG_(app.main.data.workspace.reset_zoom)
 ```
 
 
-## Debug state and objects
+### Debug state and objects
 
 There are also some useful functions to visualize the global state or
 any complex object. To use them from clojure:
@@ -169,31 +172,33 @@ dbg(js_expression) // equivalent to cljs.core.clj__GT_js(js_expression)
 ```
 
 
-## Icons & Assets
 
-The icons used on the frontend application are loaded using svgsprite
-(properly handled by the gulp watch task). All icons should be on SVG
-format located in `resources/images/icons`. The gulp task will
-generate the sprite and the embedd it into the `index.html`.
 
-Then, you can reference the icon from the sprite using the
-`app.builtins.icons/icon-xref` macro:
+## Workspace visual debug
 
-```clojure
-(ns some.namespace
-  (:require-macros [app.main.ui.icons :refer [icon-xref]]))
+Debugging a problem in the viewport algorithms for grouping and
+rotating is difficult. We have set a visual debug mode that displays
+some annotations on screen, to help understanding what's happening.
 
-(icon-xref :arrow)
+To activate it, open the javascript console and type:
+
+```js
+app.util.debug.toggle_debug("option")
 ```
 
-For performance reasons, all used icons are statically defined in the
-`src/app/main/ui/icons.cljs` file.
+Current options are `bounding-boxes`, `group`, `events` and
+`rotation-handler`.
 
+You can also activate or deactivate all visual aids with
 
+```js
+app.util.debug.debug_all()
+app.util.debug.debug_none()
+```
 
 ## Translations (I18N) ##
 
-### How it Works ###
+### How it works ###
 
 All the translation strings of this application are stored in
 `resources/locales.json` file. It has a self explanatory format that
@@ -202,13 +207,13 @@ looks like this:
 ```json
 {
   "auth.email-or-username" : {
-    "used-in" : [ "src/app/main/ui/auth/login.cljs:61" ],
+    "used-in" : [ "src/app/main/ui/auth/login.cljs" ],
     "translations" : {
       "en" : "Email or Username",
       "fr" : "adresse email ou nom d'utilisateur"
     }
   },
-  "ds.num-projects" : {
+  "labels.num-projects" : {
     "translations": {
       "en": ["1 project", "%s projects"]
     }
@@ -246,7 +251,8 @@ command for reformat the file, and track the usage locations (the
 "used-in" list) before commiting the file into the repository:
 
 ```bash
-clojure -Adev locales.clj collect src/app/main/ resources/locales.json
+# cd <repo>/frontend
+yarn run collect-locales
 ```
 
 NOTE: Later, we will need to think and implement the way to export and
@@ -256,12 +262,8 @@ compatibility).
 
 ### How to use it ###
 
-You have two aproaches for translate strings: one for general purpose
-and other specific for React components (that leverages reactivity for
-language changes).
-
-The `app.util.i18n/tr` is the general purpose function. This is a
-simple use case example:
+You need to use the `app.util.i18n/tr` function for lookup translation
+strings:
 
 ```clojure
 (require '[app.util.i18n :refer [tr])
@@ -277,10 +279,23 @@ allow the system know when to show the plural:
 ```clojure
 (require '[app.util.i18n :as i18n :refer [tr]])
 
-(tr "ds.num-projects" (i18n/c 10))
+(tr "labels.num-projects" (i18n/c 10))
 ;; => "10 projects"
 
-(tr "ds.num-projects" (i18n/c 1))
+(tr "labels.num-projects" (i18n/c 1))
 ;; => "1 project"
 ```
 
+## Tests ##
+
+Frontend tests have to be compiled first, and then run with node.
+
+```bash
+npx shadow-cljs compile tests && node target/tests.js
+```
+
+Or run the watch (that automatically runs the test):
+
+```bash
+npx shadow-cljs watch tests
+```
